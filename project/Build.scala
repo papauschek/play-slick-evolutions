@@ -10,9 +10,11 @@ object ApplicationBuild extends Build {
   val appDependencies = Seq(
     jdbc,
     cache, // play cache external module
-    "com.typesafe.slick" % "slick_2.10" % "1.0.1", // database mapper
+    //"com.typesafe.slick" % "slick_2.10" % "1.0.1", // database mapper
     "mysql" % "mysql-connector-java" % "5.1.22",
-    "securesocial" %% "securesocial" % "2.1.2"
+    "securesocial" %% "securesocial" % "2.1.2",
+    "com.typesafe.slick" %% "slick" % "2.0.0-RC1",
+    "org.slf4j" % "slf4j-nop" % "1.6.4"
   )
 
   val main = play.Project(appName, appVersion, appDependencies).settings(

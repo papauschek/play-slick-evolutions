@@ -1,8 +1,10 @@
 package plugins
 
-import db.Tables
+import db.UserIdentity
+import scala.slick.driver.MySQLDriver.simple._
+import db.Tables._
 import play.api._
-import securesocial.core.{Identity, IdentityId, UserServicePlugin}
+import securesocial.core._
 import securesocial.core.providers.Token
 
 class UserService(application: Application) extends UserServicePlugin(application) {
@@ -14,8 +16,29 @@ class UserService(application: Application) extends UserServicePlugin(applicatio
    * @return an optional user
    */
   def find(id: IdentityId):Option[Identity] = {
-    ???
+    DB {
+      implicit session => {
+        (for {
+          ul <- UserLogin if ul.provider === id.providerId && ul.providerUserId === id.userId
+          u <- User if ul.userId === u.id
+        } yield(ul, u)).firstOption.map(x => toIdentity(x._1, x._2))
+      }
+    }
   }
+
+  private def toIdentity(login: UserLoginRow, user: UserRow) : UserIdentity =
+    UserIdentity(
+      id = login.userId,
+      identityId = IdentityId(login.providerUserId, login.provider),
+      firstName = user.firstName,
+      lastName = user.lastName,
+      fullName = user.firstName + " " + user.lastName,
+      email = user.email,
+      avatarUrl = None,
+      authMethod = AuthenticationMethod(login.providerMethod),
+      oAuth1Info = None,
+      oAuth2Info = None,
+      passwordInfo = None)
 
   /**
    * Finds a user by email and provider id.
@@ -52,7 +75,7 @@ class UserService(application: Application) extends UserServicePlugin(applicatio
    * @param token The token to save
    * @return A string with a uuid that will be embedded in the welcome email.
    */
-  def save(token: Token) = {
+  def save(token: Token) {
     ???
   }
 

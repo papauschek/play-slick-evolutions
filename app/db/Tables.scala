@@ -14,55 +14,23 @@ trait Tables {
   import scala.slick.jdbc.{GetResult => GR}
   // NOTE: GetResult mappers for plain SQL are only generated for tables where Slick knows how to map the types of all columns.
   
-  /** Entity class storing rows of table Session
-   *  @param secret Database column secret PrimaryKey
-   *  @param userId Database column user_id 
-   *  @param createDate Database column create_date 
-   *  @param expireDate Database column expire_date  */
-  case class SessionRow(secret: String, userId: Int, createDate: org.joda.time.DateTime, expireDate: org.joda.time.DateTime)
-  /** GetResult implicit for fetching SessionRow objects using plain SQL queries */
-  implicit def GetResultSessionRow(implicit e0: GR[String], e1: GR[Int], e2: GR[org.joda.time.DateTime]): GR[SessionRow] = GR{
-    prs => import prs._
-    SessionRow.tupled((<<[String], <<[Int], <<[org.joda.time.DateTime], <<[org.joda.time.DateTime]))
-  }
-  /** Table description of table session. Objects of this class serve as prototypes for rows in queries. */
-  class Session(tag: Tag) extends Table[SessionRow](tag, "session") {
-    def * = (secret, userId, createDate, expireDate) <> (SessionRow.tupled, SessionRow.unapply)
-    /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (secret.?, userId.?, createDate.?, expireDate.?).shaped.<>({r=>import r._; _1.map(_=> SessionRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
-    
-    /** Database column secret PrimaryKey */
-    val secret: Column[String] = column[String]("secret", O.PrimaryKey)
-    /** Database column user_id  */
-    val userId: Column[Int] = column[Int]("user_id")
-    /** Database column create_date  */
-    val createDate: Column[org.joda.time.DateTime] = column[org.joda.time.DateTime]("create_date")
-    /** Database column expire_date  */
-    val expireDate: Column[org.joda.time.DateTime] = column[org.joda.time.DateTime]("expire_date")
-    
-    /** Foreign key referencing User (database name session_user_id) */
-    val userFk = foreignKey("session_user_id", userId, User)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
-  }
-  /** Collection-like TableQuery object for table Session */
-  lazy val Session = TableQuery[Session]
-  
-  /** Entity class storing rows of table Token
+  /** Entity class storing rows of table EmailToken
    *  @param token Database column token PrimaryKey
    *  @param email Database column email 
    *  @param isSignUp Database column is_sign_up 
    *  @param createDate Database column create_date 
    *  @param expireDate Database column expire_date  */
-  case class TokenRow(token: String, email: String, isSignUp: Byte, createDate: org.joda.time.DateTime, expireDate: org.joda.time.DateTime)
-  /** GetResult implicit for fetching TokenRow objects using plain SQL queries */
-  implicit def GetResultTokenRow(implicit e0: GR[String], e1: GR[Byte], e2: GR[org.joda.time.DateTime]): GR[TokenRow] = GR{
+  case class EmailTokenRow(token: String, email: String, isSignUp: Byte, createDate: org.joda.time.DateTime, expireDate: org.joda.time.DateTime)
+  /** GetResult implicit for fetching EmailTokenRow objects using plain SQL queries */
+  implicit def GetResultEmailTokenRow(implicit e0: GR[String], e1: GR[Byte], e2: GR[org.joda.time.DateTime]): GR[EmailTokenRow] = GR{
     prs => import prs._
-    TokenRow.tupled((<<[String], <<[String], <<[Byte], <<[org.joda.time.DateTime], <<[org.joda.time.DateTime]))
+    EmailTokenRow.tupled((<<[String], <<[String], <<[Byte], <<[org.joda.time.DateTime], <<[org.joda.time.DateTime]))
   }
-  /** Table description of table token. Objects of this class serve as prototypes for rows in queries. */
-  class Token(tag: Tag) extends Table[TokenRow](tag, "token") {
-    def * = (token, email, isSignUp, createDate, expireDate) <> (TokenRow.tupled, TokenRow.unapply)
+  /** Table description of table email_token. Objects of this class serve as prototypes for rows in queries. */
+  class EmailToken(tag: Tag) extends Table[EmailTokenRow](tag, "email_token") {
+    def * = (token, email, isSignUp, createDate, expireDate) <> (EmailTokenRow.tupled, EmailTokenRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (token.?, email.?, isSignUp.?, createDate.?, expireDate.?).shaped.<>({r=>import r._; _1.map(_=> TokenRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (token.?, email.?, isSignUp.?, createDate.?, expireDate.?).shaped.<>({r=>import r._; _1.map(_=> EmailTokenRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
     
     /** Database column token PrimaryKey */
     val token: Column[String] = column[String]("token", O.PrimaryKey)
@@ -75,8 +43,8 @@ trait Tables {
     /** Database column expire_date  */
     val expireDate: Column[org.joda.time.DateTime] = column[org.joda.time.DateTime]("expire_date")
   }
-  /** Collection-like TableQuery object for table Token */
-  lazy val Token = TableQuery[Token]
+  /** Collection-like TableQuery object for table EmailToken */
+  lazy val EmailToken = TableQuery[EmailToken]
   
   /** Entity class storing rows of table User
    *  @param id Database column id AutoInc, PrimaryKey
@@ -114,29 +82,32 @@ trait Tables {
   lazy val User = TableQuery[User]
   
   /** Entity class storing rows of table UserLogin
-   *  @param providerId Database column provider_id 
+   *  @param providerUserId Database column provider_user_id 
    *  @param provider Database column provider 
+   *  @param providerMethod Database column provider_method 
    *  @param userId Database column user_id 
    *  @param firstName Database column first_name 
    *  @param lastName Database column last_name 
    *  @param email Database column email 
    *  @param password Database column password  */
-  case class UserLoginRow(providerId: String, provider: String, userId: Int, firstName: Option[String], lastName: Option[String], email: Option[String], password: Option[String])
+  case class UserLoginRow(providerUserId: String, provider: String, providerMethod: String, userId: Int, firstName: Option[String], lastName: Option[String], email: Option[String], password: Option[String])
   /** GetResult implicit for fetching UserLoginRow objects using plain SQL queries */
   implicit def GetResultUserLoginRow(implicit e0: GR[String], e1: GR[Int]): GR[UserLoginRow] = GR{
     prs => import prs._
-    UserLoginRow.tupled((<<[String], <<[String], <<[Int], <<?[String], <<?[String], <<?[String], <<?[String]))
+    UserLoginRow.tupled((<<[String], <<[String], <<[String], <<[Int], <<?[String], <<?[String], <<?[String], <<?[String]))
   }
   /** Table description of table user_login. Objects of this class serve as prototypes for rows in queries. */
   class UserLogin(tag: Tag) extends Table[UserLoginRow](tag, "user_login") {
-    def * = (providerId, provider, userId, firstName, lastName, email, password) <> (UserLoginRow.tupled, UserLoginRow.unapply)
+    def * = (providerUserId, provider, providerMethod, userId, firstName, lastName, email, password) <> (UserLoginRow.tupled, UserLoginRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (providerId.?, provider.?, userId.?, firstName, lastName, email, password).shaped.<>({r=>import r._; _1.map(_=> UserLoginRow.tupled((_1.get, _2.get, _3.get, _4, _5, _6, _7)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (providerUserId.?, provider.?, providerMethod.?, userId.?, firstName, lastName, email, password).shaped.<>({r=>import r._; _1.map(_=> UserLoginRow.tupled((_1.get, _2.get, _3.get, _4.get, _5, _6, _7, _8)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
     
-    /** Database column provider_id  */
-    val providerId: Column[String] = column[String]("provider_id")
+    /** Database column provider_user_id  */
+    val providerUserId: Column[String] = column[String]("provider_user_id")
     /** Database column provider  */
     val provider: Column[String] = column[String]("provider")
+    /** Database column provider_method  */
+    val providerMethod: Column[String] = column[String]("provider_method")
     /** Database column user_id  */
     val userId: Column[Int] = column[Int]("user_id")
     /** Database column first_name  */
@@ -149,11 +120,43 @@ trait Tables {
     val password: Column[Option[String]] = column[Option[String]]("password")
     
     /** Primary key of UserLogin (database name CONSTRAINT_C) */
-    val pk = primaryKey("CONSTRAINT_C", (providerId, provider))
+    val pk = primaryKey("CONSTRAINT_C", (providerUserId, provider))
     
     /** Foreign key referencing User (database name user_login_user_id) */
     val userFk = foreignKey("user_login_user_id", userId, User)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
   }
   /** Collection-like TableQuery object for table UserLogin */
   lazy val UserLogin = TableQuery[UserLogin]
+  
+  /** Entity class storing rows of table UserSession
+   *  @param secret Database column secret PrimaryKey
+   *  @param userId Database column user_id 
+   *  @param createDate Database column create_date 
+   *  @param expireDate Database column expire_date  */
+  case class UserSessionRow(secret: String, userId: Int, createDate: org.joda.time.DateTime, expireDate: org.joda.time.DateTime)
+  /** GetResult implicit for fetching UserSessionRow objects using plain SQL queries */
+  implicit def GetResultUserSessionRow(implicit e0: GR[String], e1: GR[Int], e2: GR[org.joda.time.DateTime]): GR[UserSessionRow] = GR{
+    prs => import prs._
+    UserSessionRow.tupled((<<[String], <<[Int], <<[org.joda.time.DateTime], <<[org.joda.time.DateTime]))
+  }
+  /** Table description of table user_session. Objects of this class serve as prototypes for rows in queries. */
+  class UserSession(tag: Tag) extends Table[UserSessionRow](tag, "user_session") {
+    def * = (secret, userId, createDate, expireDate) <> (UserSessionRow.tupled, UserSessionRow.unapply)
+    /** Maps whole row to an option. Useful for outer joins. */
+    def ? = (secret.?, userId.?, createDate.?, expireDate.?).shaped.<>({r=>import r._; _1.map(_=> UserSessionRow.tupled((_1.get, _2.get, _3.get, _4.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    
+    /** Database column secret PrimaryKey */
+    val secret: Column[String] = column[String]("secret", O.PrimaryKey)
+    /** Database column user_id  */
+    val userId: Column[Int] = column[Int]("user_id")
+    /** Database column create_date  */
+    val createDate: Column[org.joda.time.DateTime] = column[org.joda.time.DateTime]("create_date")
+    /** Database column expire_date  */
+    val expireDate: Column[org.joda.time.DateTime] = column[org.joda.time.DateTime]("expire_date")
+    
+    /** Foreign key referencing User (database name user_session_user_id) */
+    val userFk = foreignKey("user_session_user_id", userId, User)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
+  }
+  /** Collection-like TableQuery object for table UserSession */
+  lazy val UserSession = TableQuery[UserSession]
 }

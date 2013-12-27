@@ -43,7 +43,7 @@ object DbCodeGenerator{
       case _ => super.tableName(dbTableName)
     }
 
-    override def code = "import plugins.DB._" + "\n" + super.code
+    //override def code = "import plugins.DB._" + "\n" + super.code
 
     // override generator responsible for tables
     override def Table = new Table(_){
@@ -60,7 +60,7 @@ object DbCodeGenerator{
         }
         /** JodaTime */
         override def rawType =
-          if(model.tpe == "java.sql.Timestamp") "org.joda.time.DateTime" else super.rawType
+          if(model.tpe == "java.sql.TimestampX") "org.joda.time.DateTime" else super.rawType
       }
 
     }

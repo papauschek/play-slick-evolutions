@@ -1,5 +1,6 @@
 package plugins
 
+import _root_.java.sql.Timestamp
 import db.UserIdentity
 import scala.slick.driver.MySQLDriver.simple._
 import db.Tables._
@@ -18,10 +19,27 @@ class UserService(application: Application) extends UserServicePlugin(applicatio
   def find(id: IdentityId):Option[Identity] = {
     DB {
       implicit session => {
-        (for {
+        Logger.info("test")
+        try
+        {
+          val result2 = User.map(_.id).firstOption
+        }
+        catch {
+          case ex: Throwable => Logger.error("error: " + ex.getStackTraceString, ex)
+        }
+        /*
+          ul <- UserLogin
+        } yield(ul.userId)).firstOption //.map(x => toIdentity(x._1, x._2))
+        */
+        /*
+        val result = (for {
           ul <- UserLogin if ul.provider === id.providerId && ul.providerUserId === id.userId
-          u <- ul.userFk
-        } yield(ul, u)).firstOption.map(x => toIdentity(x._1, x._2))
+          u <- User if u.id === ul.userId
+        } yield(ul.userId)).firstOption.map(x => toIdentity(x._1, x._2))
+        */
+        Logger.info("test2")
+        //result
+        None
       }
     }
   }
@@ -85,7 +103,7 @@ class UserService(application: Application) extends UserServicePlugin(applicatio
   def save(user: Identity) : Identity = {
     DB {
       implicit session => {
-        val userRow = UserRow(0, user.firstName, user.lastName, user.email, DB.utcNow)
+        val userRow = UserRow(0, user.firstName, user.lastName, user.email, new Timestamp(DB.utcNow.getMillis))
         val userId : Int = User.insert(userRow)
         val userLoginRow = toUserLogin(user, userId)
         UserLogin.insert(userLoginRow)

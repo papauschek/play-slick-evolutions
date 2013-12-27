@@ -13,8 +13,8 @@ CREATE TABLE `user`(
 
 CREATE TABLE `user_login` (
     `provider_user_id` VARCHAR(255) NOT NULL,
-    `provider` VARCHAR(100) NOT NULL,
-    `provider_method` VARCHAR(100) NOT NULL,
+    `provider` VARCHAR(255) NOT NULL,
+    `provider_method` VARCHAR(255) NOT NULL,
     `user_id` INT NOT NULL,
     `first_name` VARCHAR(255),
     `last_name` VARCHAR(255),
@@ -43,7 +43,6 @@ CREATE TABLE `email_token`(
     `create_date` DATETIME NOT NULL,
     `expire_date` DATETIME NOT NULL
 );
-
 
 # --- !Downs
 

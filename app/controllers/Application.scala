@@ -7,7 +7,7 @@ import securesocial.core.Authenticator
 object Application extends Controller {
 
   def index = Action {
-    Authenticator
+
     Ok(views.html.index("Your new application is ready."))
   }
 

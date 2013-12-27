@@ -1,10 +1,12 @@
 package plugins
 
+import db.Tables
 import play.api._
 import securesocial.core.{Identity, IdentityId, UserServicePlugin}
 import securesocial.core.providers.Token
 
 class UserService(application: Application) extends UserServicePlugin(application) {
+
   /**
    * Finds a user that maches the specified id
    *
@@ -36,6 +38,7 @@ class UserService(application: Application) extends UserServicePlugin(applicatio
    * @param user
    */
   def save(user: Identity) : Identity = {
+
     ???
   }
 

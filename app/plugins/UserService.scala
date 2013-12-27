@@ -20,7 +20,7 @@ class UserService(application: Application) extends UserServicePlugin(applicatio
       implicit session => {
         (for {
           ul <- UserLogin if ul.provider === id.providerId && ul.providerUserId === id.userId
-          u <- User if ul.userId === u.id
+          u <- ul.userFk
         } yield(ul, u)).firstOption.map(x => toIdentity(x._1, x._2))
       }
     }
@@ -38,7 +38,22 @@ class UserService(application: Application) extends UserServicePlugin(applicatio
       authMethod = AuthenticationMethod(login.providerMethod),
       oAuth1Info = None,
       oAuth2Info = None,
-      passwordInfo = None)
+      passwordInfo = login.password.map(password => {
+        PasswordInfo(login.hasher.getOrElse(""), password, login.salt)
+      }))
+
+  private def toUserLogin(identity: Identity, userId: Int) : UserLoginRow =
+    UserLoginRow(
+      providerUserId = identity.identityId.userId,
+      provider = identity.identityId.providerId,
+      providerMethod = identity.authMethod.method,
+      userId = userId,
+      firstName = Some(identity.firstName),
+      lastName = Some(identity.lastName),
+      email = identity.email,
+      hasher = identity.passwordInfo.map(_.hasher),
+      password = identity.passwordInfo.map(_.password),
+      salt = identity.passwordInfo.flatMap(_.salt))
 
   /**
    * Finds a user by email and provider id.
@@ -52,7 +67,14 @@ class UserService(application: Application) extends UserServicePlugin(applicatio
    */
   def findByEmailAndProvider(email: String, providerId: String):Option[Identity] =
   {
-    ???
+    DB {
+      implicit session => {
+        (for {
+          ul <- UserLogin if ul.email === email && ul.provider === providerId
+          u <- ul.userFk
+        } yield(ul, u)).firstOption.map(x => toIdentity(x._1, x._2))
+      }
+    }
   }
 
   /**
@@ -61,8 +83,15 @@ class UserService(application: Application) extends UserServicePlugin(applicatio
    * @param user
    */
   def save(user: Identity) : Identity = {
-
-    ???
+    DB {
+      implicit session => {
+        val userRow = UserRow(0, user.firstName, user.lastName, user.email, DB.utcNow)
+        val userId : Int = User.insert(userRow)
+        val userLoginRow = toUserLogin(user, userId)
+        UserLogin.insert(userLoginRow)
+        toIdentity(userLoginRow, userRow)
+      }
+    }
   }
 
   /**

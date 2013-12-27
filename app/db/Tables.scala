@@ -89,18 +89,20 @@ trait Tables {
    *  @param firstName Database column first_name 
    *  @param lastName Database column last_name 
    *  @param email Database column email 
-   *  @param password Database column password  */
-  case class UserLoginRow(providerUserId: String, provider: String, providerMethod: String, userId: Int, firstName: Option[String], lastName: Option[String], email: Option[String], password: Option[String])
+   *  @param hasher Database column hasher 
+   *  @param password Database column password 
+   *  @param salt Database column salt  */
+  case class UserLoginRow(providerUserId: String, provider: String, providerMethod: String, userId: Int, firstName: Option[String], lastName: Option[String], email: Option[String], hasher: Option[String], password: Option[String], salt: Option[String])
   /** GetResult implicit for fetching UserLoginRow objects using plain SQL queries */
   implicit def GetResultUserLoginRow(implicit e0: GR[String], e1: GR[Int]): GR[UserLoginRow] = GR{
     prs => import prs._
-    UserLoginRow.tupled((<<[String], <<[String], <<[String], <<[Int], <<?[String], <<?[String], <<?[String], <<?[String]))
+    UserLoginRow.tupled((<<[String], <<[String], <<[String], <<[Int], <<?[String], <<?[String], <<?[String], <<?[String], <<?[String], <<?[String]))
   }
   /** Table description of table user_login. Objects of this class serve as prototypes for rows in queries. */
   class UserLogin(tag: Tag) extends Table[UserLoginRow](tag, "user_login") {
-    def * = (providerUserId, provider, providerMethod, userId, firstName, lastName, email, password) <> (UserLoginRow.tupled, UserLoginRow.unapply)
+    def * = (providerUserId, provider, providerMethod, userId, firstName, lastName, email, hasher, password, salt) <> (UserLoginRow.tupled, UserLoginRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (providerUserId.?, provider.?, providerMethod.?, userId.?, firstName, lastName, email, password).shaped.<>({r=>import r._; _1.map(_=> UserLoginRow.tupled((_1.get, _2.get, _3.get, _4.get, _5, _6, _7, _8)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (providerUserId.?, provider.?, providerMethod.?, userId.?, firstName, lastName, email, hasher, password, salt).shaped.<>({r=>import r._; _1.map(_=> UserLoginRow.tupled((_1.get, _2.get, _3.get, _4.get, _5, _6, _7, _8, _9, _10)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
     
     /** Database column provider_user_id  */
     val providerUserId: Column[String] = column[String]("provider_user_id")
@@ -116,8 +118,12 @@ trait Tables {
     val lastName: Column[Option[String]] = column[Option[String]]("last_name")
     /** Database column email  */
     val email: Column[Option[String]] = column[Option[String]]("email")
+    /** Database column hasher  */
+    val hasher: Column[Option[String]] = column[Option[String]]("hasher")
     /** Database column password  */
     val password: Column[Option[String]] = column[Option[String]]("password")
+    /** Database column salt  */
+    val salt: Column[Option[String]] = column[Option[String]]("salt")
     
     /** Primary key of UserLogin (database name CONSTRAINT_C) */
     val pk = primaryKey("CONSTRAINT_C", (providerUserId, provider))

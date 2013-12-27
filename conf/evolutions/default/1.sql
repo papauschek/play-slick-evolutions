@@ -19,7 +19,9 @@ CREATE TABLE `user_login` (
     `first_name` VARCHAR(255),
     `last_name` VARCHAR(255),
     `email` VARCHAR(255),
+    `hasher` VARCHAR(255),
     `password` VARCHAR(255),
+    `salt` VARCHAR(255),
     PRIMARY KEY (`provider_user_id`, `provider`),
     CONSTRAINT `user_login_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
@@ -45,8 +47,8 @@ CREATE TABLE `email_token`(
 
 # --- !Downs
 
-DROP TABLE `token`;
-DROP TABLE `session`;
+DROP TABLE `email_token`;
+DROP TABLE `user_session`;
 DROP TABLE `user_login`;
 DROP TABLE `user`;
 

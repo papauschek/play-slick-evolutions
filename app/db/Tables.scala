@@ -1,5 +1,4 @@
 package db
-
 // AUTO-GENERATED Slick data model
 /** Stand-alone Slick data model for immediate use */
 object Tables extends {
@@ -10,6 +9,7 @@ object Tables extends {
 trait Tables {
   val profile: scala.slick.driver.JdbcProfile
   import profile.simple._
+  import plugins.DB._
   import scala.slick.model.ForeignKeyAction
   import scala.slick.jdbc.{GetResult => GR}
   // NOTE: GetResult mappers for plain SQL are only generated for tables where Slick knows how to map the types of all columns.
@@ -19,11 +19,11 @@ trait Tables {
    *  @param userId Database column user_id 
    *  @param createDate Database column create_date 
    *  @param expireDate Database column expire_date  */
-  case class SessionRow(secret: String, userId: Int, createDate: java.sql.Timestamp, expireDate: java.sql.Timestamp)
+  case class SessionRow(secret: String, userId: Int, createDate: org.joda.time.DateTime, expireDate: org.joda.time.DateTime)
   /** GetResult implicit for fetching SessionRow objects using plain SQL queries */
-  implicit def GetResultSessionRow(implicit e0: GR[String], e1: GR[Int], e2: GR[java.sql.Timestamp]): GR[SessionRow] = GR{
+  implicit def GetResultSessionRow(implicit e0: GR[String], e1: GR[Int], e2: GR[org.joda.time.DateTime]): GR[SessionRow] = GR{
     prs => import prs._
-    SessionRow.tupled((<<[String], <<[Int], <<[java.sql.Timestamp], <<[java.sql.Timestamp]))
+    SessionRow.tupled((<<[String], <<[Int], <<[org.joda.time.DateTime], <<[org.joda.time.DateTime]))
   }
   /** Table description of table session. Objects of this class serve as prototypes for rows in queries. */
   class Session(tag: Tag) extends Table[SessionRow](tag, "session") {
@@ -36,9 +36,9 @@ trait Tables {
     /** Database column user_id  */
     val userId: Column[Int] = column[Int]("user_id")
     /** Database column create_date  */
-    val createDate: Column[java.sql.Timestamp] = column[java.sql.Timestamp]("create_date")
+    val createDate: Column[org.joda.time.DateTime] = column[org.joda.time.DateTime]("create_date")
     /** Database column expire_date  */
-    val expireDate: Column[java.sql.Timestamp] = column[java.sql.Timestamp]("expire_date")
+    val expireDate: Column[org.joda.time.DateTime] = column[org.joda.time.DateTime]("expire_date")
     
     /** Foreign key referencing User (database name session_user_id) */
     val userFk = foreignKey("session_user_id", userId, User)(r => r.id, onUpdate=ForeignKeyAction.Restrict, onDelete=ForeignKeyAction.Restrict)
@@ -52,11 +52,11 @@ trait Tables {
    *  @param isSignUp Database column is_sign_up 
    *  @param createDate Database column create_date 
    *  @param expireDate Database column expire_date  */
-  case class TokenRow(token: String, email: String, isSignUp: Byte, createDate: java.sql.Timestamp, expireDate: java.sql.Timestamp)
+  case class TokenRow(token: String, email: String, isSignUp: Byte, createDate: org.joda.time.DateTime, expireDate: org.joda.time.DateTime)
   /** GetResult implicit for fetching TokenRow objects using plain SQL queries */
-  implicit def GetResultTokenRow(implicit e0: GR[String], e1: GR[Byte], e2: GR[java.sql.Timestamp]): GR[TokenRow] = GR{
+  implicit def GetResultTokenRow(implicit e0: GR[String], e1: GR[Byte], e2: GR[org.joda.time.DateTime]): GR[TokenRow] = GR{
     prs => import prs._
-    TokenRow.tupled((<<[String], <<[String], <<[Byte], <<[java.sql.Timestamp], <<[java.sql.Timestamp]))
+    TokenRow.tupled((<<[String], <<[String], <<[Byte], <<[org.joda.time.DateTime], <<[org.joda.time.DateTime]))
   }
   /** Table description of table token. Objects of this class serve as prototypes for rows in queries. */
   class Token(tag: Tag) extends Table[TokenRow](tag, "token") {
@@ -71,9 +71,9 @@ trait Tables {
     /** Database column is_sign_up  */
     val isSignUp: Column[Byte] = column[Byte]("is_sign_up")
     /** Database column create_date  */
-    val createDate: Column[java.sql.Timestamp] = column[java.sql.Timestamp]("create_date")
+    val createDate: Column[org.joda.time.DateTime] = column[org.joda.time.DateTime]("create_date")
     /** Database column expire_date  */
-    val expireDate: Column[java.sql.Timestamp] = column[java.sql.Timestamp]("expire_date")
+    val expireDate: Column[org.joda.time.DateTime] = column[org.joda.time.DateTime]("expire_date")
   }
   /** Collection-like TableQuery object for table Token */
   lazy val Token = TableQuery[Token]
@@ -84,11 +84,11 @@ trait Tables {
    *  @param lastName Database column last_name 
    *  @param email Database column email 
    *  @param createDate Database column create_date  */
-  case class UserRow(id: Int, firstName: String, lastName: String, email: Option[String], createDate: java.sql.Timestamp)
+  case class UserRow(id: Int, firstName: String, lastName: String, email: Option[String], createDate: org.joda.time.DateTime)
   /** GetResult implicit for fetching UserRow objects using plain SQL queries */
-  implicit def GetResultUserRow(implicit e0: GR[Int], e1: GR[String], e2: GR[java.sql.Timestamp]): GR[UserRow] = GR{
+  implicit def GetResultUserRow(implicit e0: GR[Int], e1: GR[String], e2: GR[org.joda.time.DateTime]): GR[UserRow] = GR{
     prs => import prs._
-    UserRow.tupled((<<[Int], <<[String], <<[String], <<?[String], <<[java.sql.Timestamp]))
+    UserRow.tupled((<<[Int], <<[String], <<[String], <<?[String], <<[org.joda.time.DateTime]))
   }
   /** Table description of table user. Objects of this class serve as prototypes for rows in queries. */
   class User(tag: Tag) extends Table[UserRow](tag, "user") {
@@ -105,7 +105,7 @@ trait Tables {
     /** Database column email  */
     val email: Column[Option[String]] = column[Option[String]]("email")
     /** Database column create_date  */
-    val createDate: Column[java.sql.Timestamp] = column[java.sql.Timestamp]("create_date")
+    val createDate: Column[org.joda.time.DateTime] = column[org.joda.time.DateTime]("create_date")
     
     /** Uniqueness Index over (email) (database name email_uk_index_2) */
     val index1 = index("email_uk_index_2", email, unique=true)

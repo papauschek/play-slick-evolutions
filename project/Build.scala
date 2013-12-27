@@ -35,19 +35,20 @@ object ApplicationBuild extends Build {
     // remove compiler warnings as needed
     //scalacOptions ++= Seq("-feature")
     routesImport ++= Seq("language.reflectiveCalls") // remove warnings with routes imports
+  ).dependsOn(codegenProject)
+
+  lazy val codegenProject = Project(
+    id="codegen",
+    base=file("codegen"),
+    settings = Project.defaultSettings ++ Seq(libraryDependencies ++= appDependencies)
   )
 
   // code generation task
   lazy val slick = TaskKey[Seq[File]]("gen-tables")
   lazy val slickCodeGenTask = (sourceManaged, dependencyClasspath in Compile, runner in Compile, streams) map { (dir, cp, r, s) =>
-    val outputDir = (dir / "slick").getPath // place generated files in sbt's managed sources folder
-  val url = "jdbc:h2:mem:test;MODE=MySQL;INIT=runscript from 'conf/evolutions/create.sql'" // connection info for a pre-populated throw-away, in-memory db for this demo, which is freshly initialized on every run
-  val jdbcDriver = "org.h2.Driver"
-    val slickDriver = "scala.slick.driver.H2Driver"
-    val pkg = "demo"
-    toError(r.run("scala.slick.model.codegen.SourceCodeGenerator", cp.files, Array(slickDriver, jdbcDriver, url, outputDir, pkg), s.log))
-    val fname = outputDir + "/demo/Tables.scala"
-    Seq(file(fname))
+    val outputDir = (dir.getParentFile.getParentFile.getParentFile / "app").getPath // place generated files in sbt's managed sources folder
+    toError(r.run("plugins.DbCodeGenerator", cp.files, Array(outputDir), s.log))
+    Seq.empty[File] //(file(outputDir + "/demo/Tables.scala"))
   }
 
 }

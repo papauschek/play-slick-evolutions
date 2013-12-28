@@ -1,6 +1,5 @@
 package plugins
 
-import _root_.java.sql.Timestamp
 import db.UserIdentity
 import scala.slick.driver.MySQLDriver.simple._
 import db.Tables._
@@ -9,6 +8,8 @@ import securesocial.core._
 import securesocial.core.providers.Token
 
 class UserService(application: Application) extends UserServicePlugin(application) {
+
+  implicit val mapper = DB.JodaTimeMapper
 
   /**
    * Finds a user that maches the specified id
@@ -87,7 +88,7 @@ class UserService(application: Application) extends UserServicePlugin(applicatio
     DB {
       implicit session => {
         val userRow = UserRow(0, user.firstName, user.lastName, user.email, DB.utcNow)
-        val userId : Int = User.insert(userRow)
+        val userId : Int = User returning User.map(_.id) insert(userRow)
         val userLoginRow = toUserLogin(user, userId)
         UserLogin.insert(userLoginRow)
         toIdentity(userLoginRow, userRow)
@@ -106,43 +107,48 @@ class UserService(application: Application) extends UserServicePlugin(applicatio
    * @return A string with a uuid that will be embedded in the welcome email.
    */
   def save(token: Token) {
-    ???
+    DB {
+      implicit session => {
+        val emailToken = EmailTokenRow(token.uuid, token.email, token.isSignUp, token.creationTime, token.expirationTime)
+        println(emailToken)
+        EmailToken.insert(emailToken)
+      }
+    }
   }
 
 
   /**
-   * Finds a token
-   *
-   * Note: If you do not plan to use the UsernamePassword provider just provide en empty
-   * implementation
-   *
-   * @param token the token id
-   * @return
+   * Finds a token (UsernamePassword)
    */
   def findToken(token: String): Option[Token] = {
-    ???
+    DB {
+      implicit session => {
+        EmailToken.filter(_.token === token).firstOption.map(
+          t => Token(t.token, t.email, t.createDate, t.expireDate, t.isSignUp)
+        )
+      }
+    }
   }
 
   /**
-   * Deletes a token
-   *
-   * Note: If you do not plan to use the UsernamePassword provider just provide en empty
-   * implementation
-   *
-   * @param uuid the token id
+   * Deletes a token (UsernamePassword)
    */
   def deleteToken(uuid: String) {
-    ???
+    DB {
+      implicit session => {
+        EmailToken.filter(_.token === uuid).delete
+      }
+    }
   }
 
   /**
-   * Deletes all expired tokens
-   *
-   * Note: If you do not plan to use the UsernamePassword provider just provide en empty
-   * implementation
-   *
+   * Deletes all expired tokens (UsernamePassword)
    */
   def deleteExpiredTokens() {
-    ???
+    DB {
+      implicit session => {
+        EmailToken.filter(_.expireDate < DB.utcNow).delete
+      }
+    }
   }
 }

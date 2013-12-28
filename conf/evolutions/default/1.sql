@@ -26,20 +26,18 @@ CREATE TABLE `user_login` (
     CONSTRAINT `user_login_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
-
 CREATE TABLE `user_session` (
-    `secret` VARCHAR(32) NOT NULL PRIMARY KEY,
+    `secret` VARCHAR(64) NOT NULL PRIMARY KEY,
     `user_id` INT NOT NULL,
     `create_date` DATETIME NOT NULL,
     `expire_date` DATETIME NOT NULL,
     CONSTRAINT `user_session_user_id` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 
-
 CREATE TABLE `email_token`(
-    `token` VARCHAR(32) NOT NULL PRIMARY KEY,
+    `token` VARCHAR(64) NOT NULL PRIMARY KEY,
     `email` VARCHAR(255) NOT NULL,
-    `is_sign_up`  TINYINT NOT NULL,
+    `is_sign_up` BIT(1) NOT NULL,
     `create_date` DATETIME NOT NULL,
     `expire_date` DATETIME NOT NULL
 );

@@ -20,11 +20,11 @@ trait Tables {
    *  @param isSignUp Database column is_sign_up 
    *  @param createDate Database column create_date 
    *  @param expireDate Database column expire_date  */
-  case class EmailTokenRow(token: String, email: String, isSignUp: Byte, createDate: org.joda.time.DateTime, expireDate: org.joda.time.DateTime)
+  case class EmailTokenRow(token: String, email: String, isSignUp: Boolean, createDate: org.joda.time.DateTime, expireDate: org.joda.time.DateTime)
   /** GetResult implicit for fetching EmailTokenRow objects using plain SQL queries */
-  implicit def GetResultEmailTokenRow(implicit e0: GR[String], e1: GR[Byte], e2: GR[org.joda.time.DateTime]): GR[EmailTokenRow] = GR{
+  implicit def GetResultEmailTokenRow(implicit e0: GR[String], e1: GR[Boolean], e2: GR[org.joda.time.DateTime]): GR[EmailTokenRow] = GR{
     prs => import prs._
-    EmailTokenRow.tupled((<<[String], <<[String], <<[Byte], <<[org.joda.time.DateTime], <<[org.joda.time.DateTime]))
+    EmailTokenRow.tupled((<<[String], <<[String], <<[Boolean], <<[org.joda.time.DateTime], <<[org.joda.time.DateTime]))
   }
   /** Table description of table email_token. Objects of this class serve as prototypes for rows in queries. */
   class EmailToken(tag: Tag) extends Table[EmailTokenRow](tag, "email_token") {
@@ -37,7 +37,7 @@ trait Tables {
     /** Database column email  */
     val email: Column[String] = column[String]("email")
     /** Database column is_sign_up  */
-    val isSignUp: Column[Byte] = column[Byte]("is_sign_up")
+    val isSignUp: Column[Boolean] = column[Boolean]("is_sign_up")
     /** Database column create_date  */
     val createDate: Column[org.joda.time.DateTime] = column[org.joda.time.DateTime]("create_date")
     /** Database column expire_date  */

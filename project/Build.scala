@@ -35,12 +35,16 @@ object ApplicationBuild extends Build {
     // remove compiler warnings as needed
     //scalacOptions ++= Seq("-feature")
     routesImport ++= Seq("language.reflectiveCalls") // remove warnings with routes imports
-  ).dependsOn(codegenProject)
+  ).dependsOn(codegenProject, dbGen)
 
   lazy val codegenProject = Project(
     id="codegen",
     base=file("codegen"),
     settings = Project.defaultSettings ++ Seq(libraryDependencies ++= appDependencies)
+  )
+
+  lazy val dbGen = play.Project("dbgen", appVersion, appDependencies, path = file("dbgen")).settings(
+    resolvers += Resolver.url("sbt-plugin-releases", new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-releases/"))(Resolver.ivyStylePatterns)
   )
 
   // code generation task

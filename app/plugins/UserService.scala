@@ -19,27 +19,10 @@ class UserService(application: Application) extends UserServicePlugin(applicatio
   def find(id: IdentityId):Option[Identity] = {
     DB {
       implicit session => {
-        Logger.info("test")
-        try
-        {
-          val result2 = User.map(_.id).firstOption
-        }
-        catch {
-          case ex: Throwable => Logger.error("error: " + ex.getStackTraceString, ex)
-        }
-        /*
-          ul <- UserLogin
-        } yield(ul.userId)).firstOption //.map(x => toIdentity(x._1, x._2))
-        */
-        /*
-        val result = (for {
+        (for {
           ul <- UserLogin if ul.provider === id.providerId && ul.providerUserId === id.userId
-          u <- User if u.id === ul.userId
-        } yield(ul.userId)).firstOption.map(x => toIdentity(x._1, x._2))
-        */
-        Logger.info("test2")
-        //result
-        None
+          u <- ul.userFk
+        } yield(ul, u)).firstOption.map(x => toIdentity(x._1, x._2))
       }
     }
   }
@@ -103,7 +86,7 @@ class UserService(application: Application) extends UserServicePlugin(applicatio
   def save(user: Identity) : Identity = {
     DB {
       implicit session => {
-        val userRow = UserRow(0, user.firstName, user.lastName, user.email, new Timestamp(DB.utcNow.getMillis))
+        val userRow = UserRow(0, user.firstName, user.lastName, user.email, DB.utcNow)
         val userId : Int = User.insert(userRow)
         val userLoginRow = toUserLogin(user, userId)
         UserLogin.insert(userLoginRow)

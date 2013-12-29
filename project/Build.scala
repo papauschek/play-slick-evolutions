@@ -62,7 +62,7 @@ object ApplicationBuild extends Build {
       (inFiles: Set[File]) => {
         s.log.info("Database evolutions have changed. Generating Slick code.")
         val outputDir = (dir / "main").getPath
-        toError(r.run("db.DbCodeGenerator", cp.files, Array(outputDir), s.log))
+        toError(r.run("PlaySlickCodeGenerator", cp.files, Array(outputDir), s.log))
         Set(file(outputDir + "/db/Tables.scala"))
       }
     }

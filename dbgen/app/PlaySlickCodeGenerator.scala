@@ -1,5 +1,3 @@
-package db
-
 import scala.slick.jdbc.meta.createModel
 import scala.slick.driver.H2Driver.simple._
 import scala.slick.driver.H2Driver
@@ -11,17 +9,9 @@ import scala.slick.model.codegen.SourceCodeGenerator
 import scala.slick.model.Model
 
 /**
- *  This customizes the Slick code generator. We only do simple name mappings.
- *  For a more advanced example see https://github.com/cvogt/slick-presentation/tree/scala-exchange-2013
+ *  This customizes the Slick code generator.
  */
-object DbCodeGenerator{
-
-  val url = "jdbc:h2:mem:test;MODE=MySQL"
-  val jdbcDriver =  "org.h2.Driver"
-  val slickProfile = scala.slick.driver.H2Driver
-  val dbName = "default"
-  val codePackage = "db"
-  val outputProfile = "scala.slick.driver.MySQLDriver"
+object PlaySlickCodeGenerator{
 
   def main(args: Array[String]) = {
     run(outputDir = args(0))
@@ -32,19 +22,28 @@ object DbCodeGenerator{
     // start fake application using in-memory database
     implicit val app = FakeApplication(
       path = new File("dbgen").getCanonicalFile,
-      classloader = Thread.currentThread().getContextClassLoader,
-      additionalConfiguration = Map(
-        s"db.$dbName.driver" -> jdbcDriver,
-        s"db.$dbName.url" -> url
-      ))
+      classloader = Thread.currentThread().getContextClassLoader)
 
     Play.start(app)
 
+    // read database configuration
+    val databaseNames = app.configuration.getConfig("db").toSeq.flatMap(_.subKeys)
+    val databaseName = databaseNames.headOption.getOrElse("")
+    val outputPackage = app.configuration.getString(s"db.$databaseName.outputPackage").getOrElse("")
+    val outputProfile = app.configuration.getString(s"db.$databaseName.outputProfile").getOrElse("")
+
+    if (databaseName.length == 0)
+      throw new IllegalArgumentException("No database name found in configuration")
+    else if (outputPackage.length == 0)
+      throw new IllegalArgumentException("No outputPackage found in configuration")
+    else if (outputProfile.length == 0)
+      throw new IllegalArgumentException("No outputProfile found in configuration")
+
     // apply evolutions from main project
-    Evolutions.applyFor(dbName)
+    Evolutions.applyFor(databaseName)
 
     // get list of tables for which code will be generated
-    val db = Database.forDataSource(play.api.db.DB.getDataSource(dbName))
+    val db = Database.forDataSource(play.api.db.DB.getDataSource(databaseName))
     val excludedTables = Seq("play_evolutions") // exclude play evolutions table
     val model = db.withSession {
         implicit session =>
@@ -58,7 +57,7 @@ object DbCodeGenerator{
     codegen.writeToFile(
       profile = outputProfile,
       folder = outputDir,
-      pkg = codePackage,
+      pkg = outputPackage,
       container = "Tables",
       fileName = "Tables.scala")
 

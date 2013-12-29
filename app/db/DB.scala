@@ -1,4 +1,4 @@
-package plugins
+package db
 
 import scala.slick.driver.MySQLDriver.simple._
 import play.api.Play._

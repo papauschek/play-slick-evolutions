@@ -1,14 +1,12 @@
-package plugins
+package db
 
 import scala.slick.jdbc.meta.createModel
 import scala.slick.driver.H2Driver.simple._
 import scala.slick.driver.H2Driver
-import play.api.mvc.{Handler}
 import play.api._
-import java.io.File
+import java.io._
 import play.api.db.evolutions.Evolutions
 import play.api.Application
-import play.api.Play._
 import scala.slick.model.codegen.SourceCodeGenerator
 import scala.slick.model.Model
 
@@ -22,14 +20,16 @@ object DbCodeGenerator{
   val jdbcDriver =  "org.h2.Driver"
   val slickProfile = scala.slick.driver.H2Driver
   val dbName = "default"
+  val codePackage = "db"
+  val outputProfile = "scala.slick.driver.MySQLDriver"
 
   def main(args: Array[String]) = {
-    println("Generating Slick Database Code...")
-    run(args(0))
+    run(outputDir = args(0))
   }
 
-  private def run(output: String) = {
+  private def run(outputDir: String) = {
 
+    // start fake application using in-memory database
     implicit val app = FakeApplication(
       path = new File("dbgen").getCanonicalFile,
       classloader = Thread.currentThread().getContextClassLoader,
@@ -38,15 +38,13 @@ object DbCodeGenerator{
         s"db.$dbName.url" -> url
       ))
 
-    println(app.path.toString)
-
     Play.start(app)
 
+    // apply evolutions from main project
     Evolutions.applyFor(dbName)
 
-    val db = Database.forDataSource(play.api.db.DB.getDataSource(dbName))
-
     // get list of tables for which code will be generated
+    val db = Database.forDataSource(play.api.db.DB.getDataSource(dbName))
     val excludedTables = Seq("play_evolutions") // exclude play evolutions table
     val model = db.withSession {
         implicit session =>
@@ -54,15 +52,15 @@ object DbCodeGenerator{
           createModel( tables, H2Driver )
       }
 
+    // generate slick db code
     val codegen = new PlaySlickCodeGenerator(model)
 
     codegen.writeToFile(
-      "scala.slick.driver.MySQLDriver",
-      output,
-      "db",
-      "Tables",
-      "Tables.scala"
-    )
+      profile = outputProfile,
+      folder = outputDir,
+      pkg = codePackage,
+      container = "Tables",
+      fileName = "Tables.scala")
 
     Play.stop()
   }
@@ -81,7 +79,7 @@ class PlaySlickCodeGenerator(model: Model) extends SourceCodeGenerator(model) {
     case _ => super.tableName(dbTableName)
   }
 
-  override def code = "import plugins.DB._" + "\n" + super.code
+  override def code = "import db.DB._" + "\n" + super.code
 
   // override generator responsible for tables
   override def Table = new Table(_){

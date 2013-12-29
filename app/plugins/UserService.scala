@@ -1,6 +1,6 @@
 package plugins
 
-import db.UserIdentity
+import _root_.db.{DB, UserIdentity}
 import scala.slick.driver.MySQLDriver.simple._
 import db.Tables._
 import play.api._

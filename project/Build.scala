@@ -35,7 +35,7 @@ object ApplicationBuild extends Build {
 
     slick <<= slickCodeGenTask, // register manual sbt command
 
-    sourceGenerators in Compile <+= slick,
+    sourceGenerators in Compile <+= slickCodeGenTask,
 
     //slick in Compile <<= slickCodeGenTask,
 
@@ -49,12 +49,26 @@ object ApplicationBuild extends Build {
   lazy val dbGen = play.Project("dbgen", appVersion, dbDependencies, path = file("dbgen")).settings(
   )
 
+  def recursiveListFiles(f: File): Seq[File] = {
+    val files = Option(f.listFiles).toSeq.flatten
+    files ++ files.filter(_.isDirectory).flatMap(recursiveListFiles)
+  }
+
   // code generation task
   lazy val slick = TaskKey[Seq[File]]("gen-tables")
-  lazy val slickCodeGenTask = (sourceManaged, dependencyClasspath in Compile, runner in Compile, streams) map { (dir, cp, r, s) =>
-    val outputDir = (dir / "slick").getPath
-    toError(r.run("plugins.DbCodeGenerator", cp.files, Array(outputDir), s.log))
-    Seq(file(outputDir + "/db/Tables.scala"))
+  lazy val slickCodeGenTask = (baseDirectory, confDirectory, sourceManaged, dependencyClasspath in Compile, runner in Compile, streams) map { (cache, conf, dir, cp, r, s) =>
+
+    val cachedEvolutionsGenerator = FileFunction.cached(cache / "target" / "slick-code-cache", FilesInfo.lastModified, FilesInfo.exists) {
+      (inFiles: Set[File]) => {
+        s.log.info("Database evolutions have changed. Generating Slick code.")
+        val outputDir = (dir / "main").getPath
+        toError(r.run("db.DbCodeGenerator", cp.files, Array(outputDir), s.log))
+        Set(file(outputDir + "/db/Tables.scala"))
+      }
+    }
+
+    val evolutions = recursiveListFiles(conf / "evolutions")
+    cachedEvolutionsGenerator(evolutions.toSet).toSeq
   }
 
 }

@@ -33,11 +33,9 @@ object ApplicationBuild extends Build {
     // skip api docs generation
     sources in doc in Compile := List(),
 
-    slick <<= slickCodeGenTask, // register manual sbt command
+    slickCodeGen <<= slickCodeGenTask, // register manual sbt command
 
-    sourceGenerators in Compile <+= slickCodeGenTask,
-
-    //slick in Compile <<= slickCodeGenTask,
+    sourceGenerators in Compile <+= slickCodeGenTask, // generate slick code
 
     // remove compiler warnings as needed
     //scalacOptions ++= Seq("-feature")
@@ -55,7 +53,7 @@ object ApplicationBuild extends Build {
   }
 
   // code generation task
-  lazy val slick = TaskKey[Seq[File]]("gen-tables")
+  lazy val slickCodeGen = TaskKey[Seq[File]]("gen-tables")
   lazy val slickCodeGenTask = (baseDirectory, confDirectory, sourceManaged, dependencyClasspath in Compile, runner in Compile, streams) map { (cache, conf, dir, cp, r, s) =>
 
     val cachedEvolutionsGenerator = FileFunction.cached(cache / "target" / "slick-code-cache", FilesInfo.lastModified, FilesInfo.exists) {

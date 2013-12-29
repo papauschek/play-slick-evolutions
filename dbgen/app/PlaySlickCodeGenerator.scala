@@ -14,7 +14,16 @@ import scala.slick.model.Model
 object PlaySlickCodeGenerator{
 
   def main(args: Array[String]) = {
-    run(outputDir = args(0))
+    try
+    {
+      run(outputDir = args(0))
+    }
+    catch {
+      case ex: Throwable => println("Could not generate code: " + ex.getMessage)
+    }
+    finally {
+      Play.stop()
+    }
   }
 
   private def run(outputDir: String) = {

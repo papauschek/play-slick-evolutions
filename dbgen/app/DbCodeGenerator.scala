@@ -24,18 +24,21 @@ object DbCodeGenerator{
   val dbName = "default"
 
   def main(args: Array[String]) = {
-    println("RUNNING CODE GENERATOR" + args.mkString(";"))
-    //run(args(0))
+    println("Generating Slick Database Code...")
+    run(args(0))
   }
 
   private def run(output: String) = {
 
     implicit val app = FakeApplication(
+      path = new File("dbgen").getCanonicalFile,
       classloader = Thread.currentThread().getContextClassLoader,
       additionalConfiguration = Map(
         s"db.$dbName.driver" -> jdbcDriver,
         s"db.$dbName.url" -> url
       ))
+
+    println(app.path.toString)
 
     Play.start(app)
 

@@ -52,9 +52,9 @@ object ApplicationBuild extends Build {
   // code generation task
   lazy val slick = TaskKey[Seq[File]]("gen-tables")
   lazy val slickCodeGenTask = (sourceManaged, dependencyClasspath in Compile, runner in Compile, streams) map { (dir, cp, r, s) =>
-    val outputDir = (dir.getParentFile.getParentFile.getParentFile / "app").getPath
+    val outputDir = (dir / "slick").getPath
     toError(r.run("plugins.DbCodeGenerator", cp.files, Array(outputDir), s.log))
-    Seq.empty[File] //(file(outputDir + "/demo/Tables.scala"))
+    Seq(file(outputDir + "/db/Tables.scala"))
   }
 
 }

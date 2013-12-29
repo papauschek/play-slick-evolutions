@@ -112,6 +112,8 @@ class UserService(application: Application) extends UserServicePlugin(applicatio
         val emailToken = EmailTokenRow(token.uuid, token.email, token.isSignUp, token.creationTime, token.expirationTime)
         println(emailToken)
         EmailToken.insert(emailToken)
+        val users = User.filter(_.firstName like "%chris%").list
+        println(users.map(_.id).mkString(", "))
       }
     }
   }

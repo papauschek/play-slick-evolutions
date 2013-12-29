@@ -1,13 +1,18 @@
 package controllers
 
-import play.api._
+import scala.slick.driver.MySQLDriver.simple._
+import db.Tables._
 import play.api.mvc._
-import securesocial.core.Authenticator
+import db.DB
 
 object Application extends Controller {
 
   def index = Action {
-    Ok(views.html.index("Your new application is ready."))
+    DB { implicit session =>
+      val users = User.filter(_.firstName like "%chris%").list
+      val output = users.map(_.id).mkString(", ")
+      Ok(views.html.index(output))
+    }
   }
 
 }

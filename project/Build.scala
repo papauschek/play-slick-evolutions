@@ -12,6 +12,7 @@ object ApplicationBuild extends Build {
     jdbc,
     cache, // play cache external module
     "com.typesafe.slick" %% "slick" % "2.1.0",
+    "com.typesafe.slick" %% "slick-codegen" % "2.1.0",
     "mysql" % "mysql-connector-java" % "5.1.27"
   )
 

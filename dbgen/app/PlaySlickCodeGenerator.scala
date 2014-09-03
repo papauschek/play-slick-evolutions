@@ -2,7 +2,7 @@ import java.io.File
 import play.api._
 import play.api.db.evolutions.Evolutions
 import play.api.Application
-import scala.slick.model.codegen.SourceCodeGenerator
+import scala.slick.codegen.SourceCodeGenerator
 import scala.slick.jdbc.meta.createModel
 import scala.slick.driver.H2Driver.simple._
 import scala.slick.driver.H2Driver
@@ -61,12 +61,21 @@ object PlaySlickCodeGenerator{
     val excludedTables = Seq("play_evolutions")
     val model = db.withSession {
       implicit session =>
-        val tables = H2Driver.getTables.list.filterNot(t => excludedTables contains t.name.name)
-        createModel( tables, H2Driver )
+        val tables = H2Driver.defaultTables.filterNot(t => excludedTables contains t.name.name)
+        H2Driver.createModel(Some(tables))
     }
 
     // generate slick db code
-    val codegen = new SourceCodeGenerator(model)
+    val codegen = new SourceCodeGenerator(model) {
+
+      // add some custom import
+      //override def code = "import foo.{MyCustomType,MyCustomTypeMapper}" + "\n" + super.code
+
+      // override table generator
+      override def Table = model =>  new Table(model.copy(name = model.name.copy(schema = None))) {
+
+      }
+    }
 
     codegen.writeToFile(
       profile = outputProfile,

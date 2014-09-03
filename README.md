@@ -1,7 +1,7 @@
-Slick 2.0 Code Generator and Play Framework Evolutions
+Slick 2.1 Code Generator and Play Framework 2.3 Evolutions
 ==========================
 
-This sample project shows how to integrate the Slick 2.0 code generator with the Play Framework Evolutions (database migrations).
+This sample project shows how to integrate the Slick 2.1 code generator with the Play Framework Evolutions (database migrations) for Play Framework 2.3.
 The necessary Slick code for database access is automatically generated, so that we're ready to query our database any time we change the database structure.
 
 DbGen Play Module
